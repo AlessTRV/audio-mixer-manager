@@ -7,6 +7,7 @@ mod actions;
 mod config;
 mod controller;
 mod hotkeys;
+mod icon;
 mod model;
 
 fn main() {}
