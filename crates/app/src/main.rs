@@ -8,6 +8,7 @@ mod config;
 mod controller;
 mod hotkeys;
 mod icon;
+mod instance;
 mod model;
 mod tray;
 mod ui;
