@@ -10,6 +10,7 @@
 #![cfg(windows)]
 
 pub mod com;
+pub mod device;
 pub mod error;
 pub mod events;
 
