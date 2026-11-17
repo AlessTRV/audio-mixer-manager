@@ -6,6 +6,7 @@
 mod actions;
 mod config;
 mod controller;
+mod hotkeys;
 mod model;
 
 fn main() {}
