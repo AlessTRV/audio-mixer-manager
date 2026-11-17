@@ -48,7 +48,7 @@ fn main() -> anyhow::Result<()> {
     tracing::info!(start_hidden, "starting");
 
     let icon = egui::IconData {
-        rgba: icon::speaker_rgba(64),
+        rgba: icon::app_icon_rgba(64),
         width: 64,
         height: 64,
     };
