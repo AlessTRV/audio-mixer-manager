@@ -3,4 +3,8 @@
 
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+mod actions;
+mod config;
+mod model;
+
 fn main() {}
