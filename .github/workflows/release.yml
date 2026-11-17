@@ -17,10 +17,24 @@ jobs:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
+      - name: Check tag matches the crate version
+        shell: pwsh
+        run: |
+          $version = (cargo metadata --no-deps --format-version 1 | ConvertFrom-Json).packages |
+            Where-Object name -eq 'audiomixermanager' | Select-Object -ExpandProperty version
+          if ("v$version" -ne "${{ github.ref_name }}") {
+            throw "Tag ${{ github.ref_name }} does not match crate version $version"
+          }
       - name: Build
         run: cargo build --release -p audiomixermanager
+      - name: Install Inno Setup
+        run: choco install innosetup --no-progress -y
+      - name: Build installer
+        run: '& "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe" installer\audiomixermanager.iss'
       - name: Publish release
         uses: softprops/action-gh-release@v2
         with:
-          files: target/release/audiomixermanager.exe
+          files: |
+            target/installer/AudioMixerManager-Setup-*.exe
+            target/release/audiomixermanager.exe
           generate_release_notes: true
