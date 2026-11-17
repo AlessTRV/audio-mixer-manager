@@ -5,6 +5,7 @@
 
 mod actions;
 mod config;
+mod controller;
 mod model;
 
 fn main() {}
