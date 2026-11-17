@@ -14,5 +14,6 @@ pub mod device;
 pub mod error;
 pub mod events;
 pub mod process;
+pub mod session;
 
 pub use error::{Error, Result};
