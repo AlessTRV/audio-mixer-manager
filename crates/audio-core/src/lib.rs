@@ -13,6 +13,7 @@ pub mod com;
 pub mod device;
 pub mod error;
 pub mod events;
+pub mod policy;
 pub mod process;
 pub mod session;
 
