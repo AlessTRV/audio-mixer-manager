@@ -1,0 +1,22 @@
+[package]
+name = "audiomixermanager"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+publish.workspace = true
+
+[lints]
+workspace = true
+
+[dependencies]
+anyhow = "1.0.104"
+audio-core = { path = "../audio-core" }
+eframe = { version = "0.37.0", default-features = false, features = ["glow", "default_fonts"] }
+global-hotkey = "0.10.0"
+serde = { version = "1.0.229", features = ["derive"] }
+toml = "1.2.1"
+tracing = "0.1.44"
+tracing-appender = "0.2.5"
+tracing-subscriber = { version = "0.3.23", features = ["env-filter"] }
+tray-icon = "0.24.2"
+windows = { version = "0.62.2", features = ["Win32_Foundation", "Win32_UI_WindowsAndMessaging", "Win32_System_Threading", "Win32_Security"] }
