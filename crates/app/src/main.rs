@@ -9,5 +9,6 @@ mod controller;
 mod hotkeys;
 mod icon;
 mod model;
+mod ui;
 
 fn main() {}
