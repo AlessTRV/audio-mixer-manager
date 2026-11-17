@@ -5,6 +5,7 @@
 
 mod actions;
 mod app;
+mod autostart;
 mod config;
 mod controller;
 mod hotkeys;
@@ -25,10 +26,11 @@ use crate::instance::Instance;
 use crate::tray::TrayRequest;
 
 /// Command-line flag used by the autostart entry.
-const HIDDEN_FLAG: &str = "--hidden";
+pub const HIDDEN_FLAG: &str = "--hidden";
 
 fn main() -> anyhow::Result<()> {
     let _log_guard = init_logging();
+    install_panic_hook();
 
     let primary = match instance::acquire() {
         Ok(Instance::Primary(primary)) => Some(primary),
@@ -56,7 +58,9 @@ fn main() -> anyhow::Result<()> {
             .with_inner_size([440.0, 560.0])
             .with_min_inner_size([360.0, 320.0])
             .with_icon(icon)
-            .with_visible(false),
+            .with_visible(false)
+            // Lets the shortcut overlay viewport have real rounded corners.
+            .with_transparent(true),
         ..Default::default()
     };
 
@@ -82,6 +86,19 @@ fn main() -> anyhow::Result<()> {
         }),
     )
     .map_err(|err| anyhow::anyhow!("{err}"))
+}
+
+/// Writes panics to the log: release builds have no console and abort on panic.
+fn install_panic_hook() {
+    let default = std::panic::take_hook();
+    std::panic::set_hook(Box::new(move |info| {
+        let backtrace = std::backtrace::Backtrace::force_capture();
+        tracing::error!(
+            "panic: {info}
+{backtrace}"
+        );
+        default(info);
+    }));
 }
 
 /// Logs to a daily file in `%LOCALAPPDATA%\AudioMixerManager\logs`, and to

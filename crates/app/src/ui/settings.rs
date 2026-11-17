@@ -1,4 +1,4 @@
-//! Settings view: favorite outputs and keyboard shortcuts.
+//! Settings view: general options, favorite outputs and keyboard shortcuts.
 
 use std::collections::VecDeque;
 
@@ -27,13 +27,25 @@ const KINDS: [(DeviceKind, &str); 4] = [
 /// State of the settings view.
 pub struct SettingsUi {
     pub shortcuts: ShortcutsUi,
+    /// Autostart state read from the registry when the view opens; `None`
+    /// before the first read.
+    autostart: Option<bool>,
+    autostart_failed: bool,
 }
 
 impl SettingsUi {
     pub fn new() -> Self {
         Self {
             shortcuts: ShortcutsUi::new(),
+            autostart: None,
+            autostart_failed: false,
         }
+    }
+
+    /// Call when the view is opened: refreshes what is read from the system.
+    pub fn on_open(&mut self) {
+        self.autostart = Some(crate::autostart::is_enabled());
+        self.autostart_failed = false;
     }
 
     /// Draws the view. Returns true when the user asked to go back.
@@ -62,6 +74,8 @@ impl SettingsUi {
             .id_salt("settings")
             .auto_shrink([false, false])
             .show(ui, |ui| {
+                self.general_section(ui);
+                ui.add_space(SECTION_GAP);
                 if let Some(new_config) = favorites_section(ui, snapshot, config) {
                     events.push_back(UiEvent::ConfigChanged(new_config));
                 }
@@ -74,6 +88,51 @@ impl SettingsUi {
             back = ui.input(|input| input.key_pressed(egui::Key::Escape));
         }
         back
+    }
+
+    /// "Generale": start with Windows.
+    fn general_section(&mut self, ui: &mut Ui) {
+        section_title(ui, strings::GENERAL_TITLE);
+        let enabled = *self
+            .autostart
+            .get_or_insert_with(crate::autostart::is_enabled);
+        let mut clicked = false;
+        card_frame(theme::CARD).show(ui, |ui| {
+            ui.set_width(ui.available_width());
+            ui.horizontal(|ui| {
+                let text_width =
+                    (ui.available_width() - 36.0 - ui.spacing().item_spacing.x).max(40.0);
+                ui.allocate_ui_with_layout(
+                    vec2(text_width, 0.0),
+                    Layout::top_down(Align::Min),
+                    |ui| {
+                        ui.set_width(text_width);
+                        ui.spacing_mut().item_spacing.y = 2.0;
+                        ui.add(
+                            Label::new(RichText::new(strings::AUTOSTART).color(theme::TEXT))
+                                .truncate(),
+                        );
+                        widgets::message(ui, strings::AUTOSTART_DETAIL, Tone::Info);
+                    },
+                );
+                ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
+                    clicked = widgets::toggle(ui, enabled).clicked();
+                });
+            });
+            if self.autostart_failed {
+                widgets::message(ui, strings::AUTOSTART_ERROR, Tone::Error);
+            }
+        });
+        if clicked {
+            match crate::autostart::set_enabled(!enabled) {
+                Ok(()) => self.autostart_failed = false,
+                Err(err) => {
+                    tracing::error!("cannot change autostart: {err:#}");
+                    self.autostart_failed = true;
+                }
+            }
+            self.autostart = Some(crate::autostart::is_enabled());
+        }
     }
 }
 

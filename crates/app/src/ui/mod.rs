@@ -7,6 +7,7 @@
 
 mod keys;
 mod mixer;
+mod overlay;
 mod settings;
 mod shortcuts;
 pub mod strings;
@@ -22,6 +23,8 @@ use crate::controller::Shared;
 use crate::model::{BindingError, Snapshot};
 use mixer::{MixerRequest, MixerUi};
 use settings::SettingsUi;
+
+pub use overlay::{Overlay, OverlayMessage};
 
 /// Something the caller has to act on.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -88,8 +91,12 @@ impl WindowUi {
             }))
             .show(ui, |ui| match self.view {
                 View::Mixer => match self.mixer.show(ui, snapshot, shared, config) {
-                    Some(MixerRequest::OpenSettings) => self.view = View::Settings,
+                    Some(MixerRequest::OpenSettings) => {
+                        self.settings.on_open();
+                        self.view = View::Settings;
+                    }
                     Some(MixerRequest::MuteShortcut(app)) => {
+                        self.settings.on_open();
                         self.settings.shortcuts.start_mute(app, &mut self.pending);
                         self.view = View::Settings;
                     }

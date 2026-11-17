@@ -135,3 +135,20 @@ pub const KEY_VOLUME_MUTE: &str = "Muto";
 pub const KEY_VOLUME_UP: &str = "Volume +";
 pub const KEY_VOLUME_DOWN: &str = "Volume -";
 pub const KEY_NUMPAD: &str = "Num";
+
+// General settings.
+pub const GENERAL_TITLE: &str = "Generale";
+pub const AUTOSTART: &str = "Avvia con Windows";
+pub const AUTOSTART_DETAIL: &str = "Parte nascosta nell'area di notifica";
+pub const AUTOSTART_ERROR: &str = "Impossibile modificare l'avvio automatico";
+
+// Overlay shown when a global shortcut runs an action.
+pub const OVERLAY_TITLE: &str = "Audio Mixer Manager";
+/// Followed by the output name.
+pub const OVERLAY_AUDIO_ON: &str = "Audio su";
+pub const OVERLAY_MODE_RESET: &str = "Predefinita + azzera assegnazioni";
+pub const OVERLAY_MODE_ACTIVE_ONLY: &str = "Solo app attive";
+pub const OVERLAY_MODE_KEEP_RULES: &str = "Rispetta assegnazioni";
+pub const OVERLAY_MUTED: &str = "Audio disattivato";
+pub const OVERLAY_UNMUTED: &str = "Audio riattivato";
+pub const OVERLAY_NO_SESSION: &str = "Nessuna sessione audio";

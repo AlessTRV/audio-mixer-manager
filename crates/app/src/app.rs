@@ -12,12 +12,13 @@ use crate::controller::{self, Shared};
 use crate::hotkeys::Hotkeys;
 use crate::model::{BindingError, Command};
 use crate::tray::{Tray, TrayRequest};
-use crate::ui::{UiEvent, WindowUi};
+use crate::ui::{Overlay, OverlayMessage, UiEvent, WindowUi};
 
 pub struct MixerApp {
     shared: Shared,
     controller: Option<JoinHandle<()>>,
     ui: WindowUi,
+    overlay: Overlay,
     tray: Option<Tray>,
     requests: Receiver<TrayRequest>,
     hotkeys: Option<Hotkeys>,
@@ -77,6 +78,7 @@ impl MixerApp {
             shared,
             controller: Some(controller),
             ui: WindowUi::new(&ctx),
+            overlay: Overlay::new(),
             tray,
             requests,
             hotkeys,
@@ -122,6 +124,13 @@ impl MixerApp {
     }
 
     fn run_action(&mut self, ctx: &egui::Context, action: &Action) {
+        let snapshot = self.shared.snapshot();
+        if let Some(feedback) = OverlayMessage::for_action(action, &snapshot, &self.config) {
+            self.overlay.show_message(feedback.message);
+            if !feedback.run {
+                return;
+            }
+        }
         if let Some(command) = action.to_command() {
             self.shared.send(command);
             return;
@@ -174,9 +183,21 @@ impl eframe::App for MixerApp {
                 self.synced_generation = snapshot.generation;
             }
         }
+        self.overlay.keep_alive(ctx);
+    }
+
+    /// Transparent, so that the overlay window can have rounded corners.
+    /// The main window paints its whole background itself.
+    fn clear_color(&self, _visuals: &egui::Visuals) -> [f32; 4] {
+        [0.0; 4]
     }
 
     fn ui(&mut self, ui: &mut egui::Ui, _frame: &mut eframe::Frame) {
+        self.overlay.show(ui.ctx());
+        // While hidden, `ui` runs only for the overlay: skip the window.
+        if !self.visible {
+            return;
+        }
         let snapshot = self.shared.snapshot();
         let event = self.ui.show(
             ui,
