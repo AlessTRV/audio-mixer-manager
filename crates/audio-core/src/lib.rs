@@ -11,5 +11,6 @@
 
 pub mod com;
 pub mod error;
+pub mod events;
 
 pub use error::{Error, Result};
